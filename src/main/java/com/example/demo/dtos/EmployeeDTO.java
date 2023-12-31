@@ -17,7 +17,6 @@ public class EmployeeDTO {
   }
 
   // Getters and setters
-
   public Long getId() {
     return id;
   }
