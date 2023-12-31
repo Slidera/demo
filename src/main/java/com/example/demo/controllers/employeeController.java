@@ -39,6 +39,6 @@ public class employeeController {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found with ID: " + id);
     }
     employeeService.deleteEmployee(id);
-    return ResponseEntity.ok ("Employee deleted successfully");
+    return ResponseEntity.ok("Employee deleted successfully");
   }
 }
