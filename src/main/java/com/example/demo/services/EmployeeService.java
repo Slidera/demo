@@ -1,25 +1,27 @@
 package com.example.demo.services;
 
-import com.example.demo.entities.Employee;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import java.util.List;
+import org.springframework.stereotype.Service;
+import com.example.demo.entities.Employee;
 import com.example.demo.dao.EmployeeDAO;
 
 @Service
 public class EmployeeService {
-  @Autowired
-  private EmployeeDAO employeeDao;
+  private final EmployeeDAO employeeDAO;
+
+  public EmployeeService(EmployeeDAO employeeDAO) {
+    this.employeeDAO = employeeDAO;
+  }
 
   public List<Employee> getAllEmployees() {
-    return employeeDao.findAll();
+    return employeeDAO.findAll();
   }
 
   public void addEmployee(Employee employee) {
-    employeeDao.save(employee);
+    employeeDAO.save(employee);
   }
 
   public boolean deleteEmployee(Long id) {
-    return employeeDao.deleteById(id);
+    return employeeDAO.deleteById(id);
   }
 }

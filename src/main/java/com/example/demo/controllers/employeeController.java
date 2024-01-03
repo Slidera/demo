@@ -1,33 +1,35 @@
 package com.example.demo.controllers;
 
-import com.example.demo.dtos.EmployeeDTO;
-import com.example.demo.entities.Employee;
-import com.example.demo.services.EmployeeService;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.example.demo.dtos.EmployeeDTO;
+import com.example.demo.entities.Employee;
+import com.example.demo.services.EmployeeService;
 
 @RestController
 @RequestMapping("/employees")
-public class employeeController {
+public class EmployeeController {
 
-  @Autowired
-  private EmployeeService employeeService;
+  private final EmployeeService employeeService;
+
+  public EmployeeController(EmployeeService employeeService) {
+    this.employeeService = employeeService;
+  }
 
   @GetMapping
-  public List<EmployeeDTO> getAllEmployees() {
-    return employeeService.getAllEmployees().stream()
-
+  public ResponseEntity<List<EmployeeDTO>> getAllEmployees() {
+    List<EmployeeDTO> employees = employeeService.getAllEmployees().stream()
         .map(emp -> new EmployeeDTO(emp.getId(), emp.getName(), emp.getJobRole()))
         .collect(Collectors.toList());
+    return ResponseEntity.ok(employees);
   }
 
   @PostMapping
   public ResponseEntity<String> addEmployee(@RequestBody EmployeeDTO employeeDTO) {
-    Employee employee = new Employee(null, employeeDTO.getName(), employeeDTO.getJobRole());
+    Employee employee = new Employee(employeeDTO.getId(), employeeDTO.getName(), employeeDTO.getJobRole());
     employeeService.addEmployee(employee);
     return ResponseEntity.ok("Employee added successfully");
   }
@@ -38,7 +40,6 @@ public class employeeController {
     if (!isRemoved) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found with ID: " + id);
     }
-    employeeService.deleteEmployee(id);
     return ResponseEntity.ok("Employee deleted successfully");
   }
 }

@@ -1,35 +1,52 @@
 package com.example.demo.dao;
 
-import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import com.example.demo.entities.Employee;
+
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import com.example.demo.entities.Employee;
 
 @Repository
 public class EmployeeDAO {
-  @Autowired
-  private JdbcTemplate jdbcTemplate;
+  private final JdbcTemplate jdbcTemplate;
 
   public EmployeeDAO(JdbcTemplate jdbcTemplate) {
     this.jdbcTemplate = jdbcTemplate;
   }
 
   public List<Employee> findAll() {
-    return jdbcTemplate.query("SELECT * FROM employees", new EmployeeRowMapper());
+    try {
+      return jdbcTemplate.query("SELECT * FROM employees", new EmployeeRowMapper());
+    } catch (DataAccessException e) {
+      throw new RuntimeException("Error retrieving employees", e);
+    }
   }
 
   public void save(Employee employee) {
-    jdbcTemplate.update("INSERT INTO employees (name, job_role) VALUES (?, ?)", employee.getName(),
-        employee.getJobRole());
+    try {
+      jdbcTemplate.update("INSERT INTO employees (name, job_role) VALUES (?, ?)", employee.getName(),
+          employee.getJobRole());
+    } catch (DataAccessException e) {
+      throw new RuntimeException("Error saving employee", e);
+    }
   }
 
   public boolean deleteById(Long id) {
-    int rowsAffected = jdbcTemplate.update("DELETE FROM employees WHERE id = ?", id);
-    return rowsAffected > 0;
+    try {
+      Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM employees WHERE id = ?", Integer.class, id);
+      if (count != null && count > 0) {
+        jdbcTemplate.update("DELETE FROM employees WHERE id = ?", id);
+        return true;
+      }
+      return false;
+    } catch (DataAccessException e) {
+      throw new RuntimeException("Error deleting employee with ID: " + id, e);
+    }
   }
 
   private class EmployeeRowMapper implements RowMapper<Employee> {
